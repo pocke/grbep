@@ -25,6 +25,5 @@ module Grbep
       paths = @argv[1..-1]
       return pattern, paths
     end
-
   end
 end
