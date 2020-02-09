@@ -9,16 +9,13 @@ module Grbep
       end
 
       private def convert_to_matcher(node)
-        child0 = node.children[0]
-
-        # `any`
-        if node.type == :xstr && child0.type == :str && child0.children[0] == 'any'
-          return Any.new
-        end
-
-        # vcall
-        if node.type == :send && child0 == nil && node.children.size == 2 && !node.loc.end&.is?(')')
-          return VcallOrLvar.new(node.children[1])
+        if vcall?(node)
+          name = node.children[1]
+          if name == :__any__
+            return Any.new
+          else
+            return VcallOrLvar.new(name)
+          end
         end
 
         # other cases
@@ -31,6 +28,10 @@ module Grbep
         end
 
         Generic.new(node.type, children)
+      end
+
+      private def vcall?(node)
+        node.type == :send && node.children.size == 2 && node.children[0] == nil && !node.loc.end&.is?(')')
       end
     end
 
